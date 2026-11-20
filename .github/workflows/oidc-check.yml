@@ -1,0 +1,19 @@
+name: oidc-check
+on: workflow_dispatch
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: assume
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::533267451842:role/ai-orch-terraform-deployer
+          aws-region: us-east-1
+      - name: whoami
+        run: |
+          aws sts get-caller-identity
+          aws iam list-attached-role-policies --role-name ai-orch-terraform-deployer || true
+          aws bedrock list-foundation-models --region us-east-1 --query 'modelSummaries[?contains(modelId,`anthropic`)].modelId' || true
